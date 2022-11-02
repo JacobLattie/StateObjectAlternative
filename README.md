@@ -19,7 +19,9 @@ to the child `CounterView`.
 
 https://user-images.githubusercontent.com/90261824/199534690-03cc9166-937b-4052-a31e-c4cf07487a1a.mov
 
-## Solution 
+## Usage
+
+### Solution
 
 ```swift
 import Foundation
@@ -37,6 +39,38 @@ struct ViewModelWrapper<V: View, ViewModel: ObservableObject>: View {
     var body: some View {
         contentView
             .environmentObject(contentViewModel)
+    }
+}
+```
+
+### Example
+
+```swift
+
+struct RandomNumberView: View {
+    @State var randomNumber = 0
+
+    @ObservedObject var viewModel = CounterViewModel()
+
+    var body: some View {
+        VStack {
+            Text("Random number is: \(randomNumber)")
+                .font(.title)
+                .padding(.top)
+
+            Button("Randomize number") {
+                randomNumber = (0..<1000).randomElement()!
+            }
+        }.padding(.bottom)
+
+        ViewModelWrapper(contentView:
+                            VStack {
+                                Text("Count is: \(viewModel.count)")
+                                    .font(.title)
+                            Button("Increment Counter") {
+                                viewModel.incrementCounter()
+                            }
+                        }, vm: viewModel)
     }
 }
 ```
