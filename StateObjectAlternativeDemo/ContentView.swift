@@ -26,23 +26,40 @@ struct ContentView: View {
 
 // MARK: - Counter
 
-final class CounterViewModel: ObservableObject {
-    @Published var count = 0
-
-    func incrementCounter() {
-        count += 1
-    }
+struct CounterViewModel {
+    var count = 0
 }
 
+struct CounterView: View {
+
+    enum ViewState {
+        case initial
+        case loaded(CounterViewModel)
+    }
+
+    @State var state: ViewState = .loaded(CounterViewModel())
+
+    var body: some View {
+        switch state {
+        case .initial:
+            Text("Loading...")
+        case let .loaded(viewModel):
+            Text("Count is: \(viewModel.count)")
+                .font(.title)
+
+            Button("Increment Counter") {
+                state = .loaded(.init(count: viewModel.count + 1))
+            }
+        }
+    }
+}
 
 
 // MARK: - Random Number
 
 struct RandomNumberView: View {
-    @State var randomNumber = 0
-    @State var useObservedObject = true
 
-    @ObservedObject var viewModel = CounterViewModel()
+    @State var randomNumber = 0
 
     var body: some View {
         VStack {
@@ -54,16 +71,8 @@ struct RandomNumberView: View {
                 randomNumber = (0..<1000).randomElement()!
             }
         }.padding(.bottom)
-
-        ViewModelWrapper(contentView:
-                            VStack {
-                                Text("Count is: \(viewModel.count)")
-                                    .font(.title)
-                            Button("Increment Counter") {
-                                viewModel.incrementCounter()
-                            }
-                        },
-                         vm: viewModel)
+        
+        CounterView()
     }
 }
 
