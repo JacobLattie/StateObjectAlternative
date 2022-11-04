@@ -19,9 +19,47 @@ to the child `CounterView`.
 
 https://user-images.githubusercontent.com/90261824/199534690-03cc9166-937b-4052-a31e-c4cf07487a1a.mov
 
-## Usage
+## Possible Solutions
 
-### Solution
+### Using enum Associated Values
+
+One flaw of this method is the verbose of creating a new associated value struct for each view re draw.
+Cannot use class types as they are reference types and do not trigger the @State publisher.
+
+```swift
+// MARK: - Counter
+struct CounterViewModel {
+    var count = 0
+}
+
+struct CounterView: View {
+
+    enum ViewState {
+        case initial
+        case loaded(CounterViewModel)
+    }
+
+    @State var state: ViewState = .loaded(CounterViewModel())
+
+    var body: some View {
+        switch state {
+        case .initial:
+            Text("Loading...")
+        case let .loaded(viewModel):
+            Text("Count is: \(viewModel.count)")
+                .font(.title)
+
+            Button("Increment Counter") {
+                state = .loaded(.init(count: viewModel.count + 1))
+            }
+        }
+    }
+}
+```
+
+### Using ViewModelWrapper
+
+Flaw of the risk of using environment objects for view models of the same type.
 
 ```swift
 import Foundation
@@ -42,8 +80,6 @@ struct ViewModelWrapper<V: View, ViewModel: ObservableObject>: View {
     }
 }
 ```
-
-### Example
 
 ```swift
 
