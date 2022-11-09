@@ -21,6 +21,31 @@ https://user-images.githubusercontent.com/90261824/199534690-03cc9166-937b-4052-
 
 ## Possible Solutions
 
+### Injection of a @ObservedObject
+
+The concept of this solution is to tightly bound a reference typed `viewModel` to the parent object that makes use of the SwiftUI view you want to show.
+The biggest flaw here is that if you have nested SwiftUI `View`s, you will need to pass the object reference all the way down the hierarchy.
+
+```swift
+class ClassTypedViewModel: ObservableObject {
+    @Published var renderState: RenderState = .loading // Whatever data needed
+
+    func refresh() {
+        // Update state, can be called from within your View struct or from a hosting view controller like below
+    }
+}
+
+class ViewController: UIViewController {
+    private lazy var viewModel = ClassTypedViewModel(experienceKey: "sdui_home") // Class type
+    private lazy var renderer: some View = SomeView(viewModel: viewModel).environmentObject(theme) // Reference type with class instance variable
+
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated: animated)
+        viewModel.refresh()
+    }
+}
+```
+
 ### Using enum Associated Values
 
 One flaw of this method is the verbose of creating a new associated value struct for each view re draw.
